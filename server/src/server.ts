@@ -8,5 +8,6 @@ const server = express()
 server.use(express.json())
 server.use(express.static(client))
 server.use("/api", api)
+server.get("/{*splat}", (_, res) => res.sendFile(resolve(client, "index.html")))
 
 export default server
