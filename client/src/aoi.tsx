@@ -3,7 +3,7 @@ import { RouterProvider } from "react-router/dom"
 import { createRoot } from "react-dom/client"
 import { StrictMode } from "react"
 import { routes } from "@/routes"
-import { App } from "@/App"
+import { App } from "@/app"
 import "yozora/styles"
 import "@/aoi.css"
 

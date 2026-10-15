@@ -8,6 +8,7 @@ import { Toaster, toast } from "@lib/toaster"
 import { Button } from "@ui/button"
 import { Yozora } from "yozora"
 import { tabs } from "@/tabs"
+import "@/app.css"
 
 const isAppearance = (value: string | null): value is appearances => ["light", "dark", "system"].includes(value as appearances)
 const next: Record<appearances, appearances> = {
@@ -83,7 +84,7 @@ export function App() {
         </div>
       </header>
       <main className="overflow-y-auto">{navigation.state === "loading" ? <p>Loading...</p> : <Outlet />}</main>
-      <Yozora tabs={tabs} value={location.pathname} onValueChange={navigate} />
+      <Yozora theme={appearance} tabs={tabs} value={location.pathname} onValueChange={navigate} />
       <Toaster appearance={appearance} richColors={false} />
       {/* <Toaster appearance={appearance} richColors={isDark} /> */}
     </div>
