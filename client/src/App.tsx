@@ -1,11 +1,38 @@
+import type { appearances } from "@lib/types"
+import type { YozoraTab } from "yozora"
 import type { ReactNode } from "react"
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar.tsx"
+import { createBrowserRouter, useNavigate, useLocation } from "react-router"
+import { Avatar, AvatarImage, AvatarFallback } from "@ui/avatar"
+import { Sun, Moon, Contrast, Home, User } from "lucide-react"
 import { useState, useEffect, useCallback } from "react"
-import { Sun, Moon, Contrast } from "lucide-react"
-import { Button } from "@/components/ui/button.tsx"
-import toast, { Toaster } from "@/lib/toaster"
+import { RouterProvider } from "react-router/dom"
+import { Toaster, toast } from "@lib/toaster"
+import { Button } from "@ui/button"
+import { Yozora } from "yozora"
 
-type appearances = "light" | "dark" | "system"
+const router = createBrowserRouter([
+  {
+    path: "/",
+    lazy: () => import("@page/Index")
+  },
+  {
+    path: "/profile",
+    lazy: () => import("@page/Profile")
+  }
+])
+const tabs: YozoraTab[] = [
+  {
+    id: "/",
+    icon: <Home/>,
+    label: "Home"
+  },
+  {
+    id: "/profile",
+    icon: <User/>,
+    label: "Profile"
+  }
+]
+
 const isAppearance = (value: string | null): value is appearances => ["light", "dark", "system"].includes(value as appearances)
 const next: Record<appearances, appearances> = {
   light: "dark",
@@ -18,9 +45,13 @@ const icon: Record<appearances, ReactNode> = {
   system: <Contrast />
 }
 
-export default function appLayout({ children }: { children: ReactNode }) {
+export function App () {
+  const navigate = useNavigate()
+  const location = useLocation()
+  
   const [appearance, setAppearanceState] = useState<appearances>("system")
   const [sysDark, setSysDark] = useState<boolean>(false)
+  
   useEffect(() => {
     const stored = localStorage.getItem("appearance")
     setAppearanceState(isAppearance(stored) ? stored : "system")
@@ -32,6 +63,7 @@ export default function appLayout({ children }: { children: ReactNode }) {
   }, [])
 
   const isDark = appearance === "dark" || (appearance === "system" && sysDark)
+  
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDark)
     const meta = document.querySelector('meta[name="theme-color"]')
@@ -53,7 +85,7 @@ export default function appLayout({ children }: { children: ReactNode }) {
       <header className="border-b p-2 sticky top-0 z-999 bg-background flex justify-between select-none">
         <div className="flex gap-2.5">
           <Avatar size="lg">
-            <AvatarImage src="aoi.png" alt="Aoi" />
+            <AvatarImage src="/aoi.png" alt="Aoi" />
             <AvatarFallback>A</AvatarFallback>
           </Avatar>
           <h1 className="font-mono text-xl tracking-tight self-center">Aoi</h1>
@@ -61,19 +93,13 @@ export default function appLayout({ children }: { children: ReactNode }) {
         <div className="flex gap-2.5">
           <Button variant="outline" size="icon" className="self-center overflow-hidden" onClick={() => setAppearance(next[appearance])}>
             <span className="relative size-4">
-              {(Object.keys(icon) as appearances[]).map((key) => (
-                <span
-                  key={key}
-                  className={`absolute inset-0 ${key === appearance ? "translate-y-0 transition-transform duration-300 ease-out" : key === next[appearance] ? "-translate-y-[200%]" : "translate-y-[200%] transition-transform duration-300 ease-out"}`}
-                >
-                  {icon[key]}
-                </span>
-              ))}
+              {(Object.keys(icon) as appearances[]).map((key) => <span key={key} className={`absolute inset-0 ${key === appearance ? "translate-y-0 transition-transform duration-300 ease-out" : key === next[appearance] ? "-translate-y-[200%]" : "translate-y-[200%] transition-transform duration-300 ease-out"}`}>{icon[key]}</span>)}
             </span>
           </Button>
         </div>
       </header>
-      <main className="overflow-y-auto">{children}</main>
+      <main className="overflow-y-auto"><RouterProvider router={router}/></main>
+      <Yozora tabs={tabs} defaultValue={location.pathname} onValueChange={navigate}/>
       <Toaster appearance={appearance} richColors={isDark} />
     </div>
   )

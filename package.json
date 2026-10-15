@@ -8,7 +8,7 @@
     "dev:client": "npm run dev -w client",
     "dev:server": "npm run dev -w server",
     "format": "prettier --write .",
-    "build": "npm run build -ws",
+    "build": "npm run build --ws",
     "aoi": "npm run aoi -w server"
   },
   "devDependencies": {

@@ -6,7 +6,10 @@
   ],
   "compilerOptions": {
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@ui/*": ["./src/components/ui/*"],
+      "@lib/*": ["./src/lib/*"],
+      "@page/*": ["./src/pages/*"]
     }
   }
 }
