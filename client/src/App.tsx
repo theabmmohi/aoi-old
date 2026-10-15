@@ -1,37 +1,13 @@
 import type { appearances } from "@lib/types"
-import type { YozoraTab } from "yozora"
 import type { ReactNode } from "react"
-import { createBrowserRouter, useNavigate, useLocation } from "react-router"
+import { Outlet, useNavigation, useNavigate, useLocation } from "react-router"
 import { Avatar, AvatarImage, AvatarFallback } from "@ui/avatar"
-import { Sun, Moon, Contrast, Home, User } from "lucide-react"
 import { useState, useEffect, useCallback } from "react"
-import { RouterProvider } from "react-router/dom"
+import { Sun, Moon, Contrast } from "lucide-react"
 import { Toaster, toast } from "@lib/toaster"
 import { Button } from "@ui/button"
 import { Yozora } from "yozora"
-
-const router = createBrowserRouter([
-  {
-    path: "/",
-    lazy: () => import("@page/Index")
-  },
-  {
-    path: "/profile",
-    lazy: () => import("@page/Profile")
-  }
-])
-const tabs: YozoraTab[] = [
-  {
-    id: "/",
-    icon: <Home/>,
-    label: "Home"
-  },
-  {
-    id: "/profile",
-    icon: <User/>,
-    label: "Profile"
-  }
-]
+import { tabs } from "@/tabs"
 
 const isAppearance = (value: string | null): value is appearances => ["light", "dark", "system"].includes(value as appearances)
 const next: Record<appearances, appearances> = {
@@ -45,13 +21,14 @@ const icon: Record<appearances, ReactNode> = {
   system: <Contrast />
 }
 
-export function App () {
+export function App() {
+  const navigation = useNavigation()
   const navigate = useNavigate()
   const location = useLocation()
-  
+
   const [appearance, setAppearanceState] = useState<appearances>("system")
   const [sysDark, setSysDark] = useState<boolean>(false)
-  
+
   useEffect(() => {
     const stored = localStorage.getItem("appearance")
     setAppearanceState(isAppearance(stored) ? stored : "system")
@@ -63,7 +40,7 @@ export function App () {
   }, [])
 
   const isDark = appearance === "dark" || (appearance === "system" && sysDark)
-  
+
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDark)
     const meta = document.querySelector('meta[name="theme-color"]')
@@ -93,14 +70,22 @@ export function App () {
         <div className="flex gap-2.5">
           <Button variant="outline" size="icon" className="self-center overflow-hidden" onClick={() => setAppearance(next[appearance])}>
             <span className="relative size-4">
-              {(Object.keys(icon) as appearances[]).map((key) => <span key={key} className={`absolute inset-0 ${key === appearance ? "translate-y-0 transition-transform duration-300 ease-out" : key === next[appearance] ? "-translate-y-[200%]" : "translate-y-[200%] transition-transform duration-300 ease-out"}`}>{icon[key]}</span>)}
+              {(Object.keys(icon) as appearances[]).map((key) => (
+                <span
+                  key={key}
+                  className={`absolute inset-0 ${key === appearance ? "translate-y-0 transition-transform duration-300 ease-out" : key === next[appearance] ? "-translate-y-[200%]" : "translate-y-[200%] transition-transform duration-300 ease-out"}`}
+                >
+                  {icon[key]}
+                </span>
+              ))}
             </span>
           </Button>
         </div>
       </header>
-      <main className="overflow-y-auto"><RouterProvider router={router}/></main>
-      <Yozora tabs={tabs} defaultValue={location.pathname} onValueChange={navigate}/>
-      <Toaster appearance={appearance} richColors={isDark} />
+      <main className="overflow-y-auto">{navigation.state === "loading" ? <p>Loading...</p> : <Outlet />}</main>
+      <Yozora tabs={tabs} value={location.pathname} onValueChange={navigate} />
+      <Toaster appearance={appearance} richColors={false} />
+      {/* <Toaster appearance={appearance} richColors={isDark} /> */}
     </div>
   )
 }
